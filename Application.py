@@ -1,184 +1,157 @@
-from PyQt5 import QtCore
-from PyQt5.QtCore import *
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import *
+from PyQt5 import QtCore
 from PyQt5 import QtGui
-
-
-def label_widget(label, widget, label_size=0, type_label=0):
-    l_hbox = QGridLayout()
-    l = QLabel()
-    l.setText(label)
-    if label_size != 0:
-        l.setMinimumWidth(label_size)
-        l.setMaximumWidth(label_size)
-
-    l.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
-    widget.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed))
-
-    if type_label == 0:
-        l_hbox.addWidget(l, 0, 0, alignment=Qt.AlignLeft)
-        l_hbox.addWidget(widget, 0, 1)
-    else:
-        l_hbox.addWidget(l, 0, 0, alignment=Qt.AlignLeft)
-        l_hbox.addWidget(widget, 1, 0)
-    return l_hbox
+from FileTreeView import FileTreeView
+from WorkSpaceTab import WorkSpaceTab
 
 
 class Application(QMainWindow):
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         super().__init__()
 
         self.setWindowTitle("Http Request")
         self.menu()
 
-        q_splitter = QSplitter(Qt.Horizontal)
-        q_splitter.addWidget(self.left_pane())
-        q_splitter.addWidget(self.right_pane())
+        self.l_tab_widget = QTabWidget()
+        self.l_tab_widget.setTabsClosable(True)
+        self.l_tab_widget.addTab(WorkSpaceTab(), "New request")
+
+        l_file_tree_view = FileTreeView()
+
+        q_splitter = QSplitter()
+        q_splitter.addWidget(l_file_tree_view)
+        q_splitter.addWidget(self.l_tab_widget)
+
         q_splitter.setStretchFactor(0, 1)
         q_splitter.setStretchFactor(1, 2)
         q_splitter.setContentsMargins(10, 10, 10, 10)
+
         self.setCentralWidget(q_splitter)
 
-    def left_pane(self):
-        w_widget_tab = QTabWidget()
-        w_json_edit = QTextEdit()
-        l_hbox = QHBoxLayout()
-        w_group = QWidget()
-        w_group.setLayout(l_hbox)
-
-        w_widget_tab.addTab(w_group, "UI")
-        w_widget_tab.addTab(w_json_edit, "JSON")
-
-        w_run = QPushButton()
-        w_run.setText("Run")
-        w_clear = QPushButton()
-        w_clear.setText("Reset")
-
-        l_action = QHBoxLayout()
-        l_action.addWidget(w_run, alignment=Qt.AlignLeft)
-        l_action.addWidget(w_clear, alignment=Qt.AlignRight)
-
-        w_group2 = QWidget()
-        w_group2.setLayout(l_action)
-        w_group2.setMaximumHeight(50)
-
-        q_splitter = QSplitter(Qt.Vertical)
-        q_splitter.addWidget(self.header())
-        q_splitter.addWidget(w_widget_tab)
-        q_splitter.addWidget(w_group2)
-        q_splitter.setStretchFactor(0, 1)
-        q_splitter.setStretchFactor(1, 2)
-        q_splitter.setStretchFactor(2, 1)
-        q_splitter.setStretchFactor(3, 1)
-        return q_splitter
-
-    def header(self):
-        self.w_api = QLineEdit()
-
-        w_api_type = QComboBox()
-        w_api_type.addItem("POST")
-        w_api_type.addItem("GET")
-
-        w_api_link = QComboBox()
-        w_api_link.addItem("PHARMACY_RELEASE")
-        w_api_link.addItem("PHARMACY_BETA")
-
-        w_api_param = QComboBox()
-        w_api_param.addItem("Param")
-        w_api_param.addItem("JSON")
-
-        w_description = QTextEdit()
-        w_description.setMinimumHeight(50)
-        w_description.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed))
-
-        l_vbox = QVBoxLayout()
-        l_vbox.addWidget(self.w_api, alignment=Qt.AlignTop)
-        l_vbox.addLayout(label_widget("Protocol: ", w_api_type, 120))
-        l_vbox.addLayout(label_widget("API Link: ", w_api_link, 120))
-        l_vbox.addLayout(label_widget("Parameter type: ", w_api_param, 120))
-        l_vbox.addLayout(label_widget("Description: ", w_description, 0, 1))
-
-        gr_header = QGroupBox()
-        gr_header.setLayout(l_vbox)
-        gr_header.setTitle("API")
-        gr_header.setMaximumHeight(300)
-        return gr_header
-
-    def right_pane(self):
-        w_url = QLabel()
-        w_url.setText("Url: ")
-        w_url.setTextInteractionFlags(Qt.TextSelectableByMouse)
-        w_url.setCursor(QtGui.QCursor(QtCore.Qt.IBeamCursor))
-
-        w_status_code = QLabel()
-        w_status_code.setText("0 - No API call")
-
-        l_status = QHBoxLayout()
-        l_status.addWidget(w_url, alignment=Qt.AlignLeft)
-        l_status.addWidget(w_status_code, alignment=Qt.AlignRight)
-
-        self.w_console = QTextEdit()
-
-        w_gr_vbox_console = QVBoxLayout()
-        w_gr_vbox_console.addLayout(l_status)
-        w_gr_vbox_console.addWidget(self.w_console)
-
-        w_gr_console = QGroupBox()
-        w_gr_console.setTitle("Console")
-        w_gr_console.setLayout(w_gr_vbox_console)
-
-        w_format = QPushButton()
-        w_format.setText("Format")
-
-        w_format_field = QLineEdit()
-
-        l_hbox = QHBoxLayout()
-        l_hbox.addLayout(label_widget("String object: ", w_format_field))
-        l_hbox.addWidget(w_format, alignment=Qt.AlignRight)
-
-        w_gr_vbox_result = QVBoxLayout()
-        w_gr_vbox_result.addLayout(l_hbox)
-
-        self.w_result = QTextEdit()
-        w_gr_vbox_result.addWidget(self.w_result)
-
-        w_gr_result = QGroupBox()
-        w_gr_result.setTitle("Result")
-        w_gr_result.setLayout(w_gr_vbox_result)
-
-        l_right = QSplitter(Qt.Vertical)
-        l_right.addWidget(w_gr_console)
-        l_right.addWidget(w_gr_result)
-        l_right.setStretchFactor(0, 1)
-        l_right.setStretchFactor(1, 2)
-
-        return l_right
-
     def menu(self):
-        mainMenu = QMenuBar()
+        main_menu = QMenuBar()
 
         # Create new action
-        newAction = QAction(QIcon('new.png'), '&New', self)
-        newAction.setShortcut('Ctrl+N')
-        newAction.setStatusTip('New document')
-        # newAction.triggered.connect(self.newCall)
+        new_action = QAction(QIcon('icons/note_add.svg'), '&New...', self)
+        new_action.setShortcut('Ctrl+N')
+        new_action.setStatusTip('New document')
+        new_action.triggered.connect(self.new_call)
 
         # Create new action
-        openAction = QAction(QIcon('open.png'), '&Open', self)
-        openAction.setShortcut('Ctrl+O')
-        openAction.setStatusTip('Open document')
+        open_action = QAction(QIcon('icons/description.svg'), '&Open', self)
+        open_action.setShortcut('Ctrl+O')
+        open_action.setStatusTip('Open document')
+        # openAction.triggered.connect(self.openCall)
+
+        # Create new action
+        save_action = QAction(QIcon('icons/description.svg'), '&Save', self)
+        save_action.setShortcut('Ctrl+S')
+        save_action.setStatusTip('Save document')
         # openAction.triggered.connect(self.openCall)
 
         # Create exit action
-        exitAction = QAction(QIcon('exit.png'), '&Exit', self)
-        exitAction.setShortcut('Ctrl+Q')
-        exitAction.setStatusTip('Exit application')
+        exit_action = QAction(QIcon('icons/exit_to_app.svg'), '&Exit', self)
+        exit_action.setShortcut('Ctrl+Q')
+        exit_action.setStatusTip('Exit application')
         # exitAction.triggered.connect(self.exitCall)
 
-        fileMenu = mainMenu.addMenu('&File')
-        fileMenu.addAction(newAction)
-        fileMenu.addAction(openAction)
-        fileMenu.addAction(exitAction)
+        # Create preference action
+        pref_action = QAction(QIcon('icons/settings.svg'), '&Preferences', self)
+        pref_action.setShortcut('Ctrl+P')
+        pref_action.setStatusTip('Open preferences')
+        # exitAction.triggered.connect(self.exitCall)
 
-        self.setMenuBar(mainMenu)
+        file_menu = main_menu.addMenu('&File')
+        file_menu.addAction(new_action)
+        file_menu.addAction(open_action)
+        file_menu.addSeparator()
+        file_menu.addAction(save_action)
+        file_menu.addSeparator()
+        file_menu.addAction(pref_action)
+        file_menu.addSeparator()
+        file_menu.addAction(exit_action)
+
+        # Create preference action
+        run_action = QAction(QIcon('icons/play_arrow.svg'), '&Run', self)
+        run_action.setShortcut('Ctrl+R')
+        run_action.setStatusTip('Run API call')
+        # exitAction.triggered.connect(self.exitCall)
+
+        # Create preference action
+        run_save_action = QAction(QIcon('icons/play_circle_outline.svg'), '&Run && Save', self)
+        run_save_action.setShortcut('Ctrl+Shift+R')
+        run_save_action.setStatusTip('Run and Save API call')
+        # exitAction.triggered.connect(self.exitCall)
+
+        # Create preference action
+        clear_action = QAction(QIcon('icons/refresh.svg'), '&Reset', self)
+        clear_action.setShortcut('Ctrl+Shift+C')
+        clear_action.setStatusTip('Reset param')
+        # exitAction.triggered.connect(self.exitCall)
+
+        # Create preference action
+        format_action = QAction(QIcon('icons/format_indent_increase.svg'), '&Format', self)
+        format_action.setShortcut('Ctrl+B')
+        format_action.setStatusTip('Format result')
+        # exitAction.triggered.connect(self.exitCall)
+
+        run_menu = main_menu.addMenu('&Run')
+        run_menu.addAction(run_action)
+        run_menu.addAction(run_save_action)
+        run_menu.addSeparator()
+        run_menu.addAction(clear_action)
+        run_menu.addAction(format_action)
+
+        # Create preference action
+        close_tab_action = QAction(QIcon('icons/close.svg'), '&Close Tab', self)
+        close_tab_action.setShortcut('Ctrl+W')
+        close_tab_action.setStatusTip('Close Tab')
+        # exitAction.triggered.connect(self.exitCall)
+
+        # Create preference action
+        close_all_action = QAction(QIcon('icons/clear_all.svg'), '&Close All Tab', self)
+        close_all_action.setShortcut('Ctrl+Shift+W')
+        close_all_action.setStatusTip('Close All Tab')
+        # exitAction.triggered.connect(self.exitCall)
+
+        # Create preference action
+        close_others_action = QAction(QIcon('icons/tab.svg'), '&Close Others Tab', self)
+        close_others_action.setShortcut('Ctrl+Alt+W')
+        close_others_action.setStatusTip('Close Others Tab')
+        # exitAction.triggered.connect(self.exitCall)
+
+        workspace_menu = main_menu.addMenu('&Workspace')
+        workspace_menu.addAction(close_tab_action)
+        workspace_menu.addAction(close_all_action)
+        workspace_menu.addAction(close_others_action)
+
+        # Create preference action
+        shortcut_action = QAction(QIcon('icons/keyboard.svg'), '&Shortcut', self)
+        shortcut_action.setShortcut('')
+        shortcut_action.setStatusTip('Application shortcut')
+        # exitAction.triggered.connect(self.exitCall)
+
+        # Create preference action
+        about_action = QAction(QIcon('icons/live_help.svg'), '&About', self)
+        about_action.setShortcut('')
+        about_action.setStatusTip('Application information')
+        # exitAction.triggered.connect(self.exitCall)
+
+        help_menu = main_menu.addMenu('&Help')
+        help_menu.addAction(about_action)
+        help_menu.addAction(shortcut_action)
+
+        self.setMenuBar(main_menu)
+
+    def icon(self):
+        # set app icon
+        app_icon = QtGui.QIcon()
+        app_icon.addFile('icons/description.svg', QtCore.QSize(24, 24))
+        app_icon.addFile('icons/exit_to_app.png', QtCore.QSize(24, 24))
+        app_icon.addFile('icons/note_add.png', QtCore.QSize(24, 24))
+        app_icon.addFile('icons/settings.png', QtCore.QSize(24, 24))
+        self.setWindowIcon(app_icon)
+
+    def new_call(self):
+        self.l_tab_widget.addTab(WorkSpaceTab(), "New request")
