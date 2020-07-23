@@ -1,7 +1,8 @@
 #!/usr/bin/python
-
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow
+
+from PyQt5.QtWidgets import QApplication
+
 from Application import Application
 
 
@@ -11,6 +12,7 @@ def main():
 
     app = QApplication(sys.argv)
     window = Application()
+    window.setStyleSheet(open('stylesheet/default.qss').read())
     window.show()  # IMPORTANT!!!!! Windows are hidden by default.
     app.exec_()
 
